@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { PORT } from './config.js';
 import { NotFoundError } from './utils/errors.js';
+import security from './middleware/security.js';
 import authRoutes from './routes/auth.js';
 
 const app = express();
@@ -15,6 +16,10 @@ app.use(cors());
 app.use(express.json());
 // log requests info
 app.use(morgan('tiny'));
+// for every request, check if a token exists
+// in authorization header
+// if it does, attach  the decoded user to res.locals
+app.use(security.extractUserFromJWT);
 
 app.use('/auth', authRoutes);
 

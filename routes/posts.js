@@ -1,11 +1,11 @@
 import express from 'express';
 import Post from '../models/post.js';
+import Rating from '../models/rating.js';
 import { requireAuthenticatedUser } from '../middleware/security.js';
 import {
   authUserOwnsPost,
   authedUserIsNotPostOwner,
 } from '../middleware/persmissions.js';
-import Rating from '../models/rating.js';
 
 const router = express.Router();
 

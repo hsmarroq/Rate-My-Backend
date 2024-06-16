@@ -2,6 +2,20 @@ import db from '../db.js';
 import { BadRequestError } from '../utils/errors.js';
 
 class Rating {
+  static async fetchRatingForPostByuser({ user, postId }) {
+    const results = await db.query(
+      `
+        SELECT rating, user_id, post_id, created_at
+        FROM ratings
+        WHERE user_id = (SELECT id FROM users WHERE email = $1)
+          AND post_id = $2
+      `,
+      [user.email, postId]
+    );
+
+    return results.rows[0];
+  }
+
   static async createRatingForPost({ rating, user, postId }) {
     // Check if a rating by this user for this post already exists
     const existingRating = await db.query(

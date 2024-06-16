@@ -2,19 +2,16 @@ import jwt from 'jsonwebtoken';
 import { SECRET_KEY } from '../config.js';
 import { UnauthorizedError } from '../utils/errors.js';
 
-// Create a function to extract the JWT from the request header
 const jwtFrom = ({ headers }) => {
-  if (headers?.authorization) {
-    // Authorization: "Bearer gajkhskgksnjsk"
+  if (headers && headers.authorization) {
     const [scheme, token] = headers.authorization.split(' ');
-    if (scheme.trim() === 'Bearer') {
+    if (scheme === 'Bearer') {
       return token;
     }
   }
   return undefined;
 };
 
-// Create a function to attach the user to the res object
 const extractUserFromJWT = (req, res, next) => {
   try {
     const token = jwtFrom(req);
@@ -27,12 +24,11 @@ const extractUserFromJWT = (req, res, next) => {
   }
 };
 
-// Create a function to verify an authenticated user exists
 const requireAuthenticatedUser = (req, res, next) => {
   try {
     const { user } = res.locals;
-    if (!user?.email) {
-      throw new UnauthorizedError();
+    if (!user) {
+      throw new UnauthorizedError('Unauthorized');
     }
     return next();
   } catch (error) {
@@ -40,5 +36,4 @@ const requireAuthenticatedUser = (req, res, next) => {
   }
 };
 
-// Export functions as named exports
 export { extractUserFromJWT, requireAuthenticatedUser };

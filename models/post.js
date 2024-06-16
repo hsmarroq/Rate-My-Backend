@@ -3,7 +3,7 @@ import { BadRequestError, NotFoundError } from '../utils/errors.js';
 
 class Post {
   static async listPosts() {
-    // list all posts in db in descending order of when they created
+    // List all posts in db in descending order of when they were created
     const results = await db.query(
       `
         SELECT p.id,
@@ -27,7 +27,7 @@ class Post {
   }
 
   static async fetchPostById(postId) {
-    // fetch a single post
+    // Fetch a single post
     const results = await db.query(
       `
         SELECT p.id,
@@ -40,8 +40,8 @@ class Post {
                p.created_at AS "createdAt",
                p.updated_at AS "updatedAt"
         FROM posts AS p
-          LEFT JOIN users AS u ON u.id = p.user_id
-          LEFT JOIN ratings AS r ON r.post_id = p.id
+        LEFT JOIN users AS u ON u.id = p.user_id
+        LEFT JOIN ratings AS r ON r.post_id = p.id
         WHERE p.id = $1
         GROUP BY p.id, u.email
       `,
@@ -58,7 +58,7 @@ class Post {
   }
 
   static async createNewPost({ post, user }) {
-    // create a new post
+    // Create a new post
     const requiredFields = ['caption', 'imageUrl'];
     requiredFields.forEach((field) => {
       if (!post.hasOwnProperty(field)) {
@@ -90,8 +90,8 @@ class Post {
   }
 
   static async editPost({ postId, postUpdate }) {
-    // edit a single post
-    const requiredFields = ['caption'];
+    // Edit a single post
+    const requiredFields = ['caption', 'imageUrl'];
     requiredFields.forEach((field) => {
       if (!postUpdate.hasOwnProperty(field)) {
         throw new BadRequestError(
@@ -103,9 +103,10 @@ class Post {
     const results = await db.query(
       `
         UPDATE posts
-        SET caption   = $1,
+        SET caption = $1,
+            image_url = $2,
             updated_at = NOW()
-        WHERE id =  $2
+        WHERE id = $3
         RETURNING id,
                   caption,
                   image_url AS "imageUrl",
@@ -113,16 +114,10 @@ class Post {
                   created_at AS "createdAt",
                   updated_at AS "updatedAt"
       `,
-      [postUpdate.caption, postId]
+      [postUpdate.caption, postUpdate.imageUrl, postId]
     );
 
-    const post = results.rows[0];
-
-    if (!post) {
-      throw new NotFoundError();
-    }
-
-    return post;
+    return results.rows[0];
   }
 }
 

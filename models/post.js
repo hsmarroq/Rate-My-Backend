@@ -83,6 +83,38 @@ class Post {
 
   static async editPost({ postId, postUpdate }) {
     // edit a single post
+    const requiredFields = ['caption'];
+    requiredFields.forEach((field) => {
+      if (!postUpdate.hasOwnProperty(field)) {
+        throw new BadRequestError(
+          `Required field - ${field} - missing from request body.`
+        );
+      }
+    });
+
+    const results = await db.query(
+      `
+        UPDATE posts
+        SET caption   = $1,
+            updated_at = NOW()
+        WHERE id =  $2
+        RETURNING id,
+                  caption,
+                  image_url AS "imageUrl",
+                  user_id AS "userId",
+                  created_at AS "createdAt",
+                  updated_at AS "updatedAt"
+      `,
+      [postUpdate.caption, postId]
+    );
+
+    const post = results.rows[0];
+
+    if (!post) {
+      throw new NotFoundError();
+    }
+
+    return post;
   }
 }
 

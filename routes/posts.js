@@ -1,6 +1,7 @@
 import express from 'express';
 import Post from '../models/post.js';
 import { requireAuthenticatedUser } from '../middleware/security.js';
+import { authUserOwnsPost } from '../middleware/persmissions.js';
 
 const router = express.Router();
 
@@ -35,6 +36,22 @@ router.get('/:postId', async (req, res, next) => {
     next(err);
   }
 });
+
+router.patch(
+  '/:postId',
+  requireAuthenticatedUser,
+  authUserOwnsPost,
+  async (req, res, next) => {
+    try {
+      // update a single post
+      const { postId } = req.params;
+      const post = await Post.editPost({ postUpdate: req.body, postId });
+      return res.status(200).json({ post });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 // Route to create a rating for a post
 router.post(

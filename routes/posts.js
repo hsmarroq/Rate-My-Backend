@@ -1,7 +1,11 @@
 import express from 'express';
 import Post from '../models/post.js';
 import { requireAuthenticatedUser } from '../middleware/security.js';
-import { authUserOwnsPost } from '../middleware/persmissions.js';
+import {
+  authUserOwnsPost,
+  authedUserIsNotPostOwner,
+} from '../middleware/persmissions.js';
+import Rating from '../models/rating.js';
 
 const router = express.Router();
 
@@ -37,13 +41,13 @@ router.get('/:postId', async (req, res, next) => {
   }
 });
 
+// Route to update a single post
 router.patch(
   '/:postId',
   requireAuthenticatedUser,
   authUserOwnsPost,
   async (req, res, next) => {
     try {
-      // update a single post
       const { postId } = req.params;
       const post = await Post.editPost({ postUpdate: req.body, postId });
       return res.status(200).json({ post });
@@ -57,10 +61,16 @@ router.patch(
 router.post(
   '/:postId/ratings',
   requireAuthenticatedUser,
+  authedUserIsNotPostOwner,
   async (req, res, next) => {
     try {
       const { postId } = req.params;
-      const rating = await Post.createRating(postId, req.body); // Assuming you have a method to create a rating
+      const { user } = res.locals;
+      const rating = await Rating.createRatingForPost({
+        rating: req.body.rating,
+        user,
+        postId,
+      });
       return res.status(201).json({ rating });
     } catch (err) {
       next(err);

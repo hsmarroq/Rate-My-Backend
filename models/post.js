@@ -11,10 +11,14 @@ class Post {
                p.image_url AS "imageUrl",
                p.user_id AS "userId",
                u.email AS "userEmail",
+               AVG(r.rating) AS "rating",
+               COUNT(r.rating) AS "totalRatings",
                p.created_at AS "createdAt",
                p.updated_at AS "updatedAt"
         FROM posts AS p
-          JOIN users AS u ON u.id = p.user_id
+          LEFT JOIN users AS u ON u.id = p.user_id
+          LEFT JOIN ratings AS r ON r.post_id = p.id
+        GROUP BY p.id, u.email
         ORDER BY p.created_at DESC
       `
     );
@@ -31,11 +35,15 @@ class Post {
                p.image_url AS "imageUrl",
                p.user_id AS "userId",
                u.email AS "userEmail",
+               AVG(r.rating) AS "rating",
+               COUNT(r.rating) AS "totalRatings",
                p.created_at AS "createdAt",
                p.updated_at AS "updatedAt"
         FROM posts AS p
-          JOIN users AS u ON u.id = p.user_id
+          LEFT JOIN users AS u ON u.id = p.user_id
+          LEFT JOIN ratings AS r ON r.post_id = p.id
         WHERE p.id = $1
+        GROUP BY p.id, u.email
       `,
       [postId]
     );

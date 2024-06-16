@@ -5,6 +5,7 @@ import { PORT } from './config.js';
 import { NotFoundError } from './utils/errors.js';
 import { extractUserFromJWT } from './middleware/security.js';
 import authRoutes from './routes/auth.js';
+import postRoutes from './routes/posts.js';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(morgan('tiny'));
 app.use(extractUserFromJWT);
 
 app.use('/auth', authRoutes);
+app.use('/posts', postRoutes);
 
 /** Handle 404 errors -- this matches everything */
 app.use((req, res, next) => {

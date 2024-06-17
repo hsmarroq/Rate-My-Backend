@@ -28,7 +28,7 @@ const authedUserIsNotPostOwner = async (req, res, next) => {
     const post = await Post.fetchPostById(postId);
 
     if (post.userEmail === user.email) {
-      throw new ForbiddenError(`Users are not allowed to rate their own post.`);
+      throw new ForbiddenError(`User is not allowed to rate their own post.`);
     }
 
     return next();

@@ -1,3 +1,4 @@
+// routes/posts.js
 import express from 'express';
 import Post from '../models/post.js';
 import Rating from '../models/rating.js';
@@ -21,7 +22,7 @@ router.post('/', requireAuthenticatedUser, async (req, res, next) => {
 });
 
 // Route to list all posts
-router.get('/', requireAuthenticatedUser, async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const posts = await Post.listPosts();
     return res.status(200).json({ posts });
